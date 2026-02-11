@@ -1,0 +1,6 @@
+django
+django-debug-toolbar
+mysqlclient
+requests
+psycopg2
+djangorestframework
