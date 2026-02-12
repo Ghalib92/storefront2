@@ -68,6 +68,16 @@ class CollectionViewSet(ModelViewSet):
     serializer_class = CollectionSerializer
     lookup_field = 'pk'
 
+    def delete(self, request, pk):
+        collection = get_object_or_404(Collection.objects.annotate(products_count=Count('product')), pk=pk)
+        if collection.products_count > 0:
+            return Response(
+                {'error': 'Cannot delete collection with associated products'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        collection.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 # class CollectionList(ListCreateAPIView):
 #     queryset = Collection.objects.annotate(products_count=Count('product')).all()
 #     serializer_class = CollectionSerializer
