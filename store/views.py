@@ -63,18 +63,20 @@ class ProductViewSet(ModelViewSet):
     #     product.delete()
     #     return Response(status=status.HTTP_204_NO_CONTENT)
 
-
- 
-
-class CollectionList(ListCreateAPIView):
+class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(products_count=Count('product')).all()
     serializer_class = CollectionSerializer
+    lookup_field = 'pk'
+
+# class CollectionList(ListCreateAPIView):
+#     queryset = Collection.objects.annotate(products_count=Count('product')).all()
+#     serializer_class = CollectionSerializer
 
 
-class CollectionDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Collection.objects.annotate(products_count=Count('product')).all()
-    serializer_class = CollectionSerializer
-    lookup_field = 'pk'   
+# class CollectionDetail(RetrieveUpdateDestroyAPIView):
+#     queryset = Collection.objects.annotate(products_count=Count('product')).all()
+#     serializer_class = CollectionSerializer
+#     lookup_field = 'pk'   
  
 # @api_view(['GET', 'PUT', 'DELETE'])
 # def collection_detail(request, pk):
