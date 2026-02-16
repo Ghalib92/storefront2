@@ -92,7 +92,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'storefront2_db',
         'HOST': 'localhost',
-        'USER': 'postgres',
+        'USER': 'mohaa',
         'PASSWORD': '1234'
     }
 }

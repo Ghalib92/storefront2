@@ -87,6 +87,22 @@ class Command(BaseCommand):
                 'inventory': 20,
                 'collection': electronics
             },
+            {
+                'title': 'Running Shoes',
+                'slug': 'running-shoes',
+                'description': 'Lightweight running shoes with excellent cushioning',
+                'unit_price': Decimal('89.99'),
+                'inventory': 35,
+                'collection': clothing
+            },
+            {
+                'title': 'Web Development Guide',
+                'slug': 'web-dev-guide',
+                'description': 'Complete guide to modern web development',
+                'unit_price': Decimal('49.99'),
+                'inventory': 22,
+                'collection': books
+            },
         ]
 
         # Create products

@@ -19,6 +19,14 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     lookup_field = 'id'
 
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        # Support for nested route: /collections/{collection_pk}/products/
+        collection_pk = self.kwargs.get('collection_pk')
+        if collection_pk is not None:
+            queryset = queryset.filter(collection_id=collection_pk)
+        return queryset
+
     def get_serializer_context(self):
         return {'request': self.request}
     
