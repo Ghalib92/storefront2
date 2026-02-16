@@ -1,15 +1,19 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.viewsets import ModelViewSet    
+# from rest_framework.mixins import ListModelMixin, CreateModelMixin
+# from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from .models import Product, Collection, Review, Cart, CartItem
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer
+ 
 from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework import status
-from . models import Product, Collection, Review
-from . serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 # Create your views here.
 
 
@@ -19,13 +23,19 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     lookup_field = 'id'
 
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        # Support for nested route: /collections/{collection_pk}/products/
-        collection_pk = self.kwargs.get('collection_pk')
-        if collection_pk is not None:
-            queryset = queryset.filter(collection_id=collection_pk)
-        return queryset
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['collection_id']
+ 
+    search_fields = ['title', 'description']
+    ordering_fields = ['unit_price', 'last_updated']
+
+    # def get_queryset(self):
+    #     queryset = Product.objects.all()
+    #     # Support for nested route: /collections/{collection_pk}/products/
+    #     collection_pk = self.kwargs.get('collection_pk')
+    #     if collection_pk is not None:
+    #         queryset = queryset.filter(collection_id=collection_pk)
+    #     return queryset
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -126,3 +136,46 @@ class ReviewViewSet(ModelViewSet):
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 #     serializer = CollectionSerializer(collection)
 #     return Response(serializer.data)
+
+
+class CartViewSet(ModelViewSet):
+    """
+    ViewSet for managing shopping carts.
+    
+    Endpoints:
+    - GET /carts/ - List all carts
+    - POST /carts/ - Create a new cart
+    - GET /carts/{id}/ - Retrieve a cart
+    - DELETE /carts/{id}/ - Delete a cart (clear cart)
+    """
+    queryset = Cart.objects.prefetch_related('items__product').all()
+    serializer_class = CartSerializer
+    lookup_field = 'pk'
+
+    @action(detail=True, methods=['post'])
+    def clear(self, request, pk=None):
+        """Clear all items from the cart"""
+        cart = self.get_object()
+        cart.items.all().delete()
+        return Response({'message': 'Cart cleared successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class CartItemViewSet(ModelViewSet):
+    """
+    ViewSet for managing cart items.
+    
+    Endpoints:
+    - GET /carts/{cart_pk}/items/ - List all items in cart
+    - POST /carts/{cart_pk}/items/ - Add item to cart
+    - GET /carts/{cart_pk}/items/{id}/ - Retrieve a cart item
+    - PATCH/PUT /carts/{cart_pk}/items/{id}/ - Update item quantity
+    - DELETE /carts/{cart_pk}/items/{id}/ - Remove item from cart
+    """
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).select_related('product')
+    
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}

@@ -4,3 +4,4 @@ mysqlclient
 requests
 psycopg2
 djangorestframework
+django-filter
