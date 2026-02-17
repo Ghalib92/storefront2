@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register('products', views.ProductViewSet, basename='product')
 router.register('collections', views.CollectionViewSet, basename='collection')
 router.register('carts', views.CartViewSet, basename='cart')
+router.register('customers', views.CustomerViewSet, basename='customer')
 
 # Nested router for products under collections
 # Example: /collections/{collection_pk}/products/

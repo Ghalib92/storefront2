@@ -2,14 +2,14 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from rest_framework.decorators import api_view, action
 from rest_framework.views import APIView
-# from rest_framework.mixins import ListModelMixin, CreateModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 # from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-from .models import Product, Collection, Review, Cart, CartItem
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer
+from .models import Product, Collection, Review, Cart, CartItem, Customer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, CustomerSerializer
  
 from django.db.models import Count
 from rest_framework.response import Response
@@ -179,3 +179,8 @@ class CartItemViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
+
+
+class CustomerViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
